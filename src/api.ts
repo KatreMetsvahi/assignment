@@ -1,4 +1,4 @@
-type CheckType = {
+export type CheckType = {
   description: string,
   id: string,
   priority: number

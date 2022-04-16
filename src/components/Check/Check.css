@@ -1,0 +1,11 @@
+.Check {
+  padding: 0.5rem 1rem;
+}
+
+.Check:hover {
+  background-color: var(--muted-color);
+}
+
+.Check__description {
+  margin: 0;
+}

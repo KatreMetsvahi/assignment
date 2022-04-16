@@ -1,0 +1,13 @@
+.Checks {
+  max-width: 25rem;
+}
+
+.Checks.Checks--has-error {
+  text-align: center;
+}
+
+.Checks__list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
