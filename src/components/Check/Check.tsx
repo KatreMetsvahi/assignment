@@ -6,14 +6,15 @@ import "./Check.css";
 
 interface Props extends CheckType {
   active?: boolean,
+  disabled?: boolean,
   onValueSelect: (value: ValueType) => void
 }
 
-const Check = ({ active = false, description, onValueSelect, value }: Props) => {
+const Check = ({ active = false, disabled = false, description, onValueSelect, value }: Props) => {
   return (
-    <li className={cx("Check", { "Check--active": active })}>
+    <li className={cx("Check", { "Check--active": active, "Check--disabled": disabled })}>
       <p className="Check__description">{description}</p>
-      <ButtonGroup onClick={onValueSelect} value={value} />
+      <ButtonGroup disabled={disabled} onClick={onValueSelect} value={value} />
     </li>
   );
 };

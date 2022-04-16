@@ -10,6 +10,11 @@
   background-color: var(--highlight-color);
 }
 
+.Check.Check--disabled {
+  color: var(--muted-text-color);
+  pointer-events: none;
+}
+
 .Check__description {
   margin: 0 0 0.5rem;
 }

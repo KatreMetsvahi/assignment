@@ -19,7 +19,7 @@
 
 .Button:disabled {
   background-color: var(--muted-color);
-  color: #bdc0cf;
+  color: var(--muted-text-color);
   cursor: not-allowed;
 }
 

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { CheckType, fetchChecks, ValueType } from "../../api";
 import Button from "../Button/Button";
 import Check from "../Check/Check";
+import findIndexOfFinalMatch from "../../util/findIndexOfFinalMatch";
 import sort from "../../util/sort";
 import sumWithLimits from "../../util/sumWithLimits";
 import "./Checks.css";
@@ -9,6 +10,7 @@ import "./Checks.css";
 const Checks = () => {
   const [checks, setChecks] = useState([] as CheckType[]);
   const [activeCheck, setActiveCheck] = useState(-1);
+  const [lastEnabledCheck, setLastEnabledCheck] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -27,14 +29,23 @@ const Checks = () => {
       const checksCopy = [...checks];
       checksCopy[index] = { ...checks[index], value };
       setChecks(checksCopy);
+
+      if (value === 'yes') {
+        const lastIndex = findIndexOfFinalMatch(checks, 'value', 'yes', index);
+        setLastEnabledCheck(sumWithLimits(lastIndex, 1, 0, checks.length - 1));
+      }
+
+      if (value === 'no') {
+        setLastEnabledCheck(index);
+      }
     }
 
     setActiveCheck(index);
   }, [checks]);
 
   const getActiveCheck = useCallback((increment: number) => {
-    return sumWithLimits(activeCheck, increment, 0, checks.length - 1);
-  }, [activeCheck, checks.length]);
+    return sumWithLimits(activeCheck, increment, 0, lastEnabledCheck);
+  }, [activeCheck, lastEnabledCheck]);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (event.key === 'ArrowDown') {
@@ -86,6 +97,7 @@ const Checks = () => {
           <Check
             {...check}
             active={activeCheck === index}
+            disabled={index > lastEnabledCheck}
             key={check.id}
             onValueSelect={value => handleValueSelect(index, value)}
           />

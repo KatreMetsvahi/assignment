@@ -3,6 +3,7 @@
   border: 1px solid var(--primary-color);
   border-right-width: 0;
   color: var(--primary-color);
+  cursor: pointer;
   font-size: 14px;
   height: 30px;
   padding: 0 1rem;
@@ -24,4 +25,14 @@
 .ButtonGroup__button.ButtonGroup__button--active {
   background-color: var(--primary-color);
   color: white;
+}
+
+.ButtonGroup__button:disabled {
+  border-color: var(--muted-color);
+  color: var(--muted-text-color);
+  cursor: not-allowed;
+}
+
+.ButtonGroup__button.ButtonGroup__button--active:disabled {
+  background-color: var(--muted-color);
 }
