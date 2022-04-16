@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { CheckType, fetchChecks } from "../../api";
 import Button from "../Button/Button";
 import Check from "../Check/Check";
+import sort from "../../util/sort";
 import "./Checks.css";
 
 const Checks = () => {
@@ -14,7 +15,7 @@ const Checks = () => {
     setHasError(false);
 
     fetchChecks()
-      .then((result: CheckType[]) => setChecks(result))
+      .then((result: CheckType[]) => setChecks(sort(result, 'priority')))
       .catch(() => setHasError(true))
       .finally(() => setIsLoading(false));
   }

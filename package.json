@@ -12,6 +12,7 @@
     "react-scripts": "3.0.1"
   },
   "devDependencies": {
+    "@types/jest": "27.4.1",
     "typescript": "3.8.3"
   },
   "scripts": {
