@@ -1,7 +1,10 @@
+export type ValueType = 'yes' | 'no';
+
 export type CheckType = {
   description: string,
   id: string,
-  priority: number
+  priority: number,
+  value?: ValueType
 }
 
 export function fetchChecks(): Promise<CheckType[]> {

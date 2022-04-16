@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CheckType, fetchChecks } from "../../api";
+import { CheckType, fetchChecks, ValueType } from "../../api";
 import Button from "../Button/Button";
 import Check from "../Check/Check";
 import sort from "../../util/sort";
@@ -20,6 +20,21 @@ const Checks = () => {
       .then((result: CheckType[]) => setChecks(sort(result, 'priority')))
       .catch(() => setHasError(true))
       .finally(() => setIsLoading(false));
+  }
+
+  function handleValueSelect(index: number, value: ValueType) {
+    if (checks[index].value !== value) {
+      const checksCopy = [...checks];
+
+      checksCopy[index] = {
+        ...checks[index],
+        value
+      };
+
+      setChecks(checksCopy);
+    }
+
+    setActiveCheck(index);
   }
 
   useEffect(() => {
@@ -65,7 +80,12 @@ const Checks = () => {
     <div className="Checks">
       <ul className="Checks__list">
         {checks.map((check: CheckType, index: number) => (
-          <Check {...check} active={activeCheck === index} key={check.id} />
+          <Check
+            {...check}
+            active={activeCheck === index}
+            key={check.id}
+            onValueSelect={value => handleValueSelect(index, value)}
+          />
         ))}
       </ul>
     </div>

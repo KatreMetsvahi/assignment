@@ -1,0 +1,27 @@
+.ButtonGroup__button {
+  background-color: white;
+  border: 1px solid var(--primary-color);
+  border-right-width: 0;
+  color: var(--primary-color);
+  font-size: 14px;
+  height: 30px;
+  padding: 0 1rem;
+}
+
+.ButtonGroup__button:hover {
+  background-color: var(--highlight-color);
+}
+
+.ButtonGroup__button:first-of-type {
+  border-radius: 5px 0 0 5px;
+}
+
+.ButtonGroup__button:last-of-type {
+  border-right-width: 1px;
+  border-radius: 0 5px 5px 0;
+}
+
+.ButtonGroup__button.ButtonGroup__button--active {
+  background-color: var(--primary-color);
+  color: white;
+}
