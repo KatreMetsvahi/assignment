@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { CheckType, fetchChecks, ValueType } from "../../api";
 import Button from "../Button/Button";
 import Check from "../Check/Check";
@@ -22,46 +22,49 @@ const Checks = () => {
       .finally(() => setIsLoading(false));
   }
 
-  function handleValueSelect(index: number, value: ValueType) {
+  const handleValueSelect = useCallback((index: number, value: ValueType) => {
     if (checks[index].value !== value) {
       const checksCopy = [...checks];
-
-      checksCopy[index] = {
-        ...checks[index],
-        value
-      };
-
+      checksCopy[index] = { ...checks[index], value };
       setChecks(checksCopy);
     }
 
     setActiveCheck(index);
-  }
+  }, [checks]);
+
+  const getActiveCheck = useCallback((increment: number) => {
+    return sumWithLimits(activeCheck, increment, 0, checks.length - 1);
+  }, [activeCheck, checks.length]);
+
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'ArrowDown') {
+      setActiveCheck(getActiveCheck(1));
+    }
+
+    if (event.key === 'ArrowUp') {
+      setActiveCheck(getActiveCheck(-1));
+    }
+
+    if (event.key === "1" && activeCheck !== -1) {
+      handleValueSelect(activeCheck, "yes");
+    }
+
+    if (event.key === "2" && activeCheck !== -1) {
+      handleValueSelect(activeCheck, "no");
+    }
+  }, [activeCheck, getActiveCheck, handleValueSelect]);
 
   useEffect(() => {
     getChecks();
   }, []);
 
   useEffect(() => {
-    function getActiveCheck(increment: number) {
-      return sumWithLimits(activeCheck, increment, 0, checks.length - 1);
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'ArrowDown') {
-        setActiveCheck(getActiveCheck(1));
-      }
-
-      if (event.key === 'ArrowUp') {
-        setActiveCheck(getActiveCheck(-1));
-      }
-    }
-
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [activeCheck, checks.length]);
+  }, [handleKeyDown]);
 
   if (isLoading) {
     return <p>Loading...</p>;
