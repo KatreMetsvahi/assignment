@@ -1,4 +1,10 @@
-export function fetchChecks() {
+type CheckType = {
+  description: string,
+  id: string,
+  priority: number
+}
+
+export function fetchChecks(): Promise<CheckType[]> {
   return new Promise((resolve, reject) =>
     setTimeout(
       () =>
@@ -31,12 +37,17 @@ export function fetchChecks() {
   );
 }
 
+type ResultType = {
+  checkId: string,
+  value: string
+}
+
 /**
  * @param {Object[]} results - The list of check results
  * @param {string} results[].checkId - Check id
- * @param {string} results[].result - Result value (yes / no)
+ * @param {string} results[].value - Result value (yes / no)
  */
-export function submitCheckResults(results) {
+export function submitCheckResults(results: ResultType[]): Promise<ResultType[]> {
   return new Promise((resolve, reject) =>
     setTimeout(
       () =>
