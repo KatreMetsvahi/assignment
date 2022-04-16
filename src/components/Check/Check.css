@@ -6,6 +6,10 @@
   background-color: var(--muted-color);
 }
 
+.Check.Check--active {
+  background-color: var(--highlight-color);
+}
+
 .Check__description {
   margin: 0;
 }

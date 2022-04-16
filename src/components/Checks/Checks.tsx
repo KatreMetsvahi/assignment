@@ -3,10 +3,12 @@ import { CheckType, fetchChecks } from "../../api";
 import Button from "../Button/Button";
 import Check from "../Check/Check";
 import sort from "../../util/sort";
+import sumWithLimits from "../../util/sumWithLimits";
 import "./Checks.css";
 
 const Checks = () => {
   const [checks, setChecks] = useState([] as CheckType[]);
+  const [activeCheck, setActiveCheck] = useState(-1);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -24,6 +26,28 @@ const Checks = () => {
     getChecks();
   }, []);
 
+  useEffect(() => {
+    function getActiveCheck(increment: number) {
+      return sumWithLimits(activeCheck, increment, 0, checks.length - 1);
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'ArrowDown') {
+        setActiveCheck(getActiveCheck(1));
+      }
+
+      if (event.key === 'ArrowUp') {
+        setActiveCheck(getActiveCheck(-1));
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [activeCheck, checks.length]);
+
   if (isLoading) {
     return <p>Loading...</p>;
   }
@@ -40,7 +64,9 @@ const Checks = () => {
   return (
     <div className="Checks">
       <ul className="Checks__list">
-        {checks.map((check: CheckType) => <Check {...check} key={check.id} />)}
+        {checks.map((check: CheckType, index: number) => (
+          <Check {...check} active={activeCheck === index} key={check.id} />
+        ))}
       </ul>
     </div>
   );
