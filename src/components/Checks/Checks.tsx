@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { CheckType, fetchChecks, ValueType } from "../../api";
+import { CheckType, CheckTypeStrict, fetchChecks, submitCheckResults, ValueType } from "../../api";
 import Button from "../Button/Button";
 import Check from "../Check/Check";
 import findIndexOfFinalMatch from "../../util/findIndexOfFinalMatch";
@@ -7,21 +7,29 @@ import sort from "../../util/sort";
 import sumWithLimits from "../../util/sumWithLimits";
 import "./Checks.css";
 
+enum RequestStatus {
+  NONE = 'none',
+  LOADING = 'loading',
+  FAILED = 'failed',
+  SUCCESS = 'success'
+}
+
 const Checks = () => {
   const [checks, setChecks] = useState([] as CheckType[]);
   const [activeCheck, setActiveCheck] = useState(-1);
   const [lastEnabledCheck, setLastEnabledCheck] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const [fetchStatus, setFetchStatus] = useState(RequestStatus.NONE);
+  const [submitStatus, setSubmitStatus] = useState(RequestStatus.NONE);
 
   function getChecks() {
-    setIsLoading(true);
-    setHasError(false);
+    setFetchStatus(RequestStatus.LOADING);
 
     fetchChecks()
-      .then((result: CheckType[]) => setChecks(sort(result, 'priority')))
-      .catch(() => setHasError(true))
-      .finally(() => setIsLoading(false));
+      .then((result: CheckType[]) => {
+        setChecks(sort(result, 'priority'));
+        setFetchStatus(RequestStatus.SUCCESS);
+      })
+      .catch(() => setFetchStatus(RequestStatus.FAILED));
   }
 
   const handleValueSelect = useCallback((index: number, value: ValueType) => {
@@ -42,6 +50,15 @@ const Checks = () => {
 
     setActiveCheck(index);
   }, [checks]);
+
+  const handleSubmit = () => {
+    setSubmitStatus(RequestStatus.LOADING);
+
+    const slicedChecks = checks.slice(0, lastEnabledCheck + 1) as CheckTypeStrict[];
+    submitCheckResults(slicedChecks.map(({ id, value }: CheckTypeStrict) => ({ checkId: id, value })))
+      .then(() => setSubmitStatus(RequestStatus.SUCCESS))
+      .catch(() => setSubmitStatus(RequestStatus.FAILED));
+  };
 
   const getActiveCheck = useCallback((increment: number) => {
     return sumWithLimits(activeCheck, increment, 0, lastEnabledCheck);
@@ -77,11 +94,11 @@ const Checks = () => {
     }
   }, [handleKeyDown]);
 
-  if (isLoading) {
+  if (fetchStatus === RequestStatus.LOADING) {
     return <p>Loading...</p>;
   }
 
-  if (hasError) {
+  if (fetchStatus === RequestStatus.FAILED) {
     return (
       <div className="Checks Checks--has-error">
         <p>Error loading data.</p>
@@ -103,6 +120,23 @@ const Checks = () => {
           />
         ))}
       </ul>
+
+      <div className="Checks__footer">
+        <Button
+          disabled={submitStatus === RequestStatus.LOADING
+            || !(checks.some((check: CheckType) => check.value === 'no')
+            || checks.every((check: CheckType) => check.value === 'yes'))}
+          onClick={handleSubmit}
+        >
+          Submit
+        </Button>
+
+        <div className="Checks__submit-status">
+          {submitStatus === RequestStatus.LOADING && <p>Submitting...</p>}
+          {submitStatus === RequestStatus.FAILED && <p>Failed to submit, please try again</p>}
+          {submitStatus === RequestStatus.SUCCESS && <p>Submitted!</p>}
+        </div>
+      </div>
     </div>
   );
 };

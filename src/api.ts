@@ -7,6 +7,10 @@ export type CheckType = {
   value?: ValueType
 }
 
+export type CheckTypeStrict = CheckType & {
+  value: ValueType
+}
+
 export function fetchChecks(): Promise<CheckType[]> {
   return new Promise((resolve, reject) =>
     setTimeout(
@@ -42,7 +46,7 @@ export function fetchChecks(): Promise<CheckType[]> {
 
 type ResultType = {
   checkId: string,
-  value: string
+  value: ValueType
 }
 
 /**

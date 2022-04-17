@@ -11,3 +11,14 @@
   margin: 0;
   padding: 0;
 }
+
+.Checks__footer {
+  margin: 6rem 1rem 0;
+  position: relative;
+  text-align: right;
+}
+
+.Checks__submit-status {
+  position: absolute;
+  right: 0;
+}
