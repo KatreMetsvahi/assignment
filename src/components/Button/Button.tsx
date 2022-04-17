@@ -8,7 +8,7 @@ interface Props {
   type?: 'button' | 'reset' | 'submit'
 }
 
-const Button = ({ children, disabled, onClick, type = 'button' }: Props) => {
+const Button = ({ children, disabled = false, onClick, type = 'button' }: Props) => {
   return (
     <button className="Button" disabled={disabled} onClick={onClick} type={type}>
       {children}

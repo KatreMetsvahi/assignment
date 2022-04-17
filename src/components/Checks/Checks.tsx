@@ -4,7 +4,6 @@ import Button from "../Button/Button";
 import Check from "../Check/Check";
 import findIndexOfFinalMatch from "../../util/findIndexOfFinalMatch";
 import sort from "../../util/sort";
-import sumWithLimits from "../../util/sumWithLimits";
 import "./Checks.css";
 
 enum RequestStatus {
@@ -21,7 +20,7 @@ const Checks = () => {
   const [fetchStatus, setFetchStatus] = useState(RequestStatus.NONE);
   const [submitStatus, setSubmitStatus] = useState(RequestStatus.NONE);
 
-  function getChecks() {
+  const getChecks = () => {
     setFetchStatus(RequestStatus.LOADING);
 
     fetchChecks()
@@ -30,17 +29,31 @@ const Checks = () => {
         setFetchStatus(RequestStatus.SUCCESS);
       })
       .catch(() => setFetchStatus(RequestStatus.FAILED));
-  }
+  };
+
+  const handleSubmit = () => {
+    setSubmitStatus(RequestStatus.LOADING);
+    const slicedChecks = checks.slice(0, lastEnabledCheck + 1) as CheckTypeStrict[];
+    const checkResults = slicedChecks.map(({ id, value }: CheckTypeStrict) => ({ checkId: id, value }));
+
+    submitCheckResults(checkResults)
+      .then(() => setSubmitStatus(RequestStatus.SUCCESS))
+      .catch(() => setSubmitStatus(RequestStatus.FAILED));
+  };
 
   const handleValueSelect = useCallback((index: number, value: ValueType) => {
-    if (checks[index].value !== value) {
+    const updateCheckValue = () => {
       const checksCopy = [...checks];
       checksCopy[index] = { ...checks[index], value };
       setChecks(checksCopy);
+    };
+
+    if (checks[index] && checks[index].value !== value) {
+      updateCheckValue();
 
       if (value === 'yes') {
         const lastIndex = findIndexOfFinalMatch(checks, 'value', 'yes', index);
-        setLastEnabledCheck(sumWithLimits(lastIndex, 1, 0, checks.length - 1));
+        setLastEnabledCheck(Math.min(lastIndex + 1, checks.length - 1));
       }
 
       if (value === 'no') {
@@ -51,48 +64,31 @@ const Checks = () => {
     setActiveCheck(index);
   }, [checks]);
 
-  const handleSubmit = () => {
-    setSubmitStatus(RequestStatus.LOADING);
-
-    const slicedChecks = checks.slice(0, lastEnabledCheck + 1) as CheckTypeStrict[];
-    submitCheckResults(slicedChecks.map(({ id, value }: CheckTypeStrict) => ({ checkId: id, value })))
-      .then(() => setSubmitStatus(RequestStatus.SUCCESS))
-      .catch(() => setSubmitStatus(RequestStatus.FAILED));
-  };
-
-  const getActiveCheck = useCallback((increment: number) => {
-    return sumWithLimits(activeCheck, increment, 0, lastEnabledCheck);
-  }, [activeCheck, lastEnabledCheck]);
-
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === 'ArrowDown') {
-      setActiveCheck(getActiveCheck(1));
-    }
-
-    if (event.key === 'ArrowUp') {
-      setActiveCheck(getActiveCheck(-1));
-    }
-
-    if (event.key === "1" && activeCheck !== -1) {
-      handleValueSelect(activeCheck, "yes");
-    }
-
-    if (event.key === "2" && activeCheck !== -1) {
-      handleValueSelect(activeCheck, "no");
-    }
-  }, [activeCheck, getActiveCheck, handleValueSelect]);
-
   useEffect(() => {
     getChecks();
   }, []);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case 'ArrowDown':
+          setActiveCheck(Math.min(activeCheck + 1, lastEnabledCheck));
+          return;
+        case 'ArrowUp':
+          setActiveCheck(Math.max(activeCheck - 1, 0));
+          return;
+        case '1':
+          handleValueSelect(activeCheck, "yes");
+          return;
+        case '2':
+          handleValueSelect(activeCheck, "no");
+          return;
+      }
+    };
 
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    }
-  }, [handleKeyDown]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeCheck, checks.length, handleValueSelect, lastEnabledCheck]);
 
   if (fetchStatus === RequestStatus.LOADING) {
     return <p>Loading...</p>;
@@ -127,6 +123,7 @@ const Checks = () => {
             || !(checks.some((check: CheckType) => check.value === 'no')
             || checks.every((check: CheckType) => check.value === 'yes'))}
           onClick={handleSubmit}
+          type="submit"
         >
           Submit
         </Button>

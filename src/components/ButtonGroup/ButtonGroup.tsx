@@ -10,7 +10,7 @@ interface ButtonProps {
   onClick: () => void
 }
 
-const Button = ({ active, children, disabled, onClick }: ButtonProps) => {
+const Button = ({ active, children, disabled = false, onClick }: ButtonProps) => {
   return (
     <button
       className={cx("ButtonGroup__button", {
